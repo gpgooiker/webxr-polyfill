@@ -1,0 +1,97 @@
+
+  <html>
+    <head>
+      <title>Hit test example</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+      <style>
+        body, html {
+          padding: 0;
+          margin: 0;
+          overflow: hidden;
+          position: fixed;
+          width: 100%;
+          height: 100vh;
+          -webkit-user-select: none;
+          user-select: none;
+          font-family: sans-serif;
+        }
+        #ar-canvas {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+        }
+        .common-message {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 20px;
+        }
+        .button-bar {
+          position: absolute;
+          transition: transform 0.2s;
+          transform: translateY(30px);
+          width: 100%;
+          bottom: 0;
+          background-color: hsla(305, 53%, 49%, 0.8);
+          color: white;
+          text-align: center;
+          padding: 10px;
+        }
+      </style>
+      <link rel="stylesheet" href="../common.css"/>
+      <script src="../libs/three.min.js"></script>
+      <script type="module" src="../../polyfill/XRPolyfill.js"></script>
+      <script nomodule src="../../dist/webxr-polyfill.js"></script>
+      <script src="../common.js"></script>
+    </head>
+    <body>
+      <div id="target" />
+      <div onclick="hideMe(this)" id="description">
+        <h2>Conditional buttons</h2>
+        <h5>(click to dismiss)</h5>
+        <p>Example of buttons that show when you look down. Buttons take up space. In AR, we can use the direction you look at as a condition to show things you can interact with.</p>
+      </div>
+      <div id="some-button-bar" class="button-bar">Conditional button</div>
+      <script>
+        class ConditionalButtonsExample extends XRExampleBase {
+          constructor(domElement){
+            super(domElement, false)
+            this.buttonBar = document.getElementById('some-button-bar')
+          }
+
+          // Called during construction to allow the app to populate this.scene
+          initializeScene(){
+            // Add a few lights
+            this.scene.add(new THREE.AmbientLight('#FFF', 0.2))
+            let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
+            directionalLight.position.set(0, 10, 0)
+            this.scene.add(directionalLight)
+          }
+
+          // Called once per frame, before render, to give the app a chance to update this.scene
+          updateScene(frame){
+            // When looking down, show a button
+            let cameraWorldRotation = this.camera.getWorldRotation()
+
+            if (cameraWorldRotation && cameraWorldRotation.x < -0.8) {
+              this.buttonBar.style.transform = 'translateY(0)'
+            } else {
+              this.buttonBar.style.transform = 'translateY(30px)'
+            }
+          }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => {
+            try {
+              window.pageApp = new ConditionalButtonsExample(document.getElementById('ar-canvas'))
+            } catch(e) {
+              console.error('page error', e)
+            }
+          }, 1000)
+        })
+      </script>
+    </body>
+  </html>
